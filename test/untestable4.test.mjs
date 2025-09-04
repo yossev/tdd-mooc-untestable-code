@@ -35,4 +35,26 @@ describe("Globals and singletons: enterprise application", () => {
     expect(userAfter.passwordHash).to.not.equal(userBefore.passwordHash);
     expect(hasher.verifyPassword(userAfter.passwordHash, "new-pw")).to.be.true;
   }
+
+
+  test("Old password did not match"), async () => {
+     const userBefore = {
+      userId,
+      passwordHash: hasher.hashPassword("old-pw")
+    }
+    await users.save(userBefore);
+    
+    let error;
+    try {
+      await service.changePassword(userId, "wrong-pw", "new-pw");
+    }
+    catch(e) {
+      error = e;
+    }
+    expect(error).to.deep.equal(new Error("wrong old password"));
+    
+    const userAfter = await users.getById(userId);
+    expect(userAfter.passwordHash).to.equal(userBefore.passwordHash);
+    expect(hasher.verifyPassword(userAfter.passwordHash, "old-pw")).to.be.true;
+  }
 });
