@@ -9,15 +9,7 @@ export class PostgresUserDao {
   constructor(db){
     this.db = db;
   }
-
-  /*
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new PostgresUserDao();
-    }
-    return this.instance;
-  }
-  */
+  
   close() {
     this.db.end();
   }
@@ -93,14 +85,17 @@ export class FakePasswordHasher {
 
 
 export class PasswordService {
-  users = this.db;
+  constructor(users, hasher){
+    this.users = this.users;
+    this.hasher = hasher;
+  }
 
   async changePassword(userId, oldPassword, newPassword) {
     const user = await this.users.getById(userId);
-    if (!argon2.verifySync(user.passwordHash, oldPassword)) {
+    if (!this.hasher.verifySync(user.passwordHash, oldPassword)) {
       throw new Error("wrong old password");
     }
-    user.passwordHash = argon2.hashSync(newPassword);
+    user.passwordHash = this.hasher.hashPassword(newPassword);
     await this.users.save(user);
   }
 }
