@@ -9,7 +9,7 @@ export class PostgresUserDao {
   constructor(db){
     this.db = db;
   }
-  
+
   close() {
     this.db.end();
   }
@@ -46,7 +46,7 @@ export class PostgresUserDao {
 // Fake to test the DB in memory
 // This fake mimics the actual DAO, we're testing the logic without relying on the real DB
 // to ensure it safely and accurately mimics the actual DAO we use StructeredClone()
-export class InMemoryDAO {
+export class InMemoryUserDao {
   users = {}
 
   async getById(userId){
