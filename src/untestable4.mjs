@@ -1,24 +1,23 @@
-import argon2 from "@node-rs/argon2";
+import argon2, { hash } from "@node-rs/argon2";
 import pg from "pg";
 
-export class PostgresUserDao {
-  static instance;
+// Singleton is an anti pattern
+// I Will be using fakes to test.
 
+
+export class PostgresUserDao {
+  constructor(db){
+    this.db = db;
+  }
+
+  /*
   static getInstance() {
     if (!this.instance) {
       this.instance = new PostgresUserDao();
     }
     return this.instance;
   }
-
-  db = new pg.Pool({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT,
-  });
-
+  */
   close() {
     this.db.end();
   }
@@ -48,8 +47,53 @@ export class PostgresUserDao {
   }
 }
 
+
+
+
+
+// Fake to test the DB in memory
+// This fake mimics the actual DAO, we're testing the logic without relying on the real DB
+// to ensure it safely and accurately mimics the actual DAO we use StructeredClone()
+export class InMemoryDAO {
+  users = {}
+
+  async getById(userId){
+    return structuredClone(this.users[userId]) || null;
+  }
+
+  async save(user){
+    return this.users[user.userId] = structuredClone(user);
+  }
+}
+
+// You shouldnt have multiple tests for hashing related stuff
+export class SecurePasswordHasher {
+  hashPassword(password) {
+    return argon2.hashSync(password);
+  }
+
+  verifyPassword(hash, password) {
+    return argon2.verifySync(hash, password);
+  }
+}
+
+export class FakePasswordHasher {
+  intToHex(n) {
+    return (n >>> 0).toString(16).padStart(8, "0");
+  }
+
+  hashPassword(password) {
+    return this.intToHex(crc32(password));
+  }
+
+  verifyPassword(hash, password) {
+    return this.hashPassword(password) === hash;
+  }
+}
+
+
 export class PasswordService {
-  users = PostgresUserDao.getInstance();
+  users = this.db;
 
   async changePassword(userId, oldPassword, newPassword) {
     const user = await this.users.getById(userId);

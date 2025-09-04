@@ -7,9 +7,6 @@ describe("Untestable 4: enterprise application", () => {
     service = new PasswordService();
   });
 
-  afterEach(() => {
-    PostgresUserDao.getInstance().close();
-  });
 
   test("todo", async () => {
     // TODO: write proper tests for both PasswordService and PostgresUserDao
