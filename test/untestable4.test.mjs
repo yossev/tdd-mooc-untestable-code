@@ -8,7 +8,7 @@ import {
   SecurePasswordHasher,
 } from "../src/untestable4.mjs"
 
-// Remember Contract tests, side effects and edge cases
+// Remember Contract tests, edge cases
 
 
 describe("Globals and singletons: enterprise application", () => {
@@ -52,7 +52,7 @@ describe("Globals and singletons: enterprise application", () => {
       error = e;
     }
     expect(error).to.deep.equal(new Error("wrong old password"));
-    
+
     const userAfter = await users.getById(userId);
     expect(userAfter.passwordHash).to.equal(userBefore.passwordHash);
     expect(hasher.verifyPassword(userAfter.passwordHash, "old-pw")).to.be.true;
