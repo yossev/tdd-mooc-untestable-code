@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, test } from "vitest";
 import { PasswordService, PostgresUserDao } from "../src/untestable4.mjs";
+import { expect } from "chai";
 import {
   FakePasswordHasher,
   InMemoryUserDao,
@@ -57,4 +58,37 @@ describe("Globals and singletons: enterprise application", () => {
     expect(userAfter.passwordHash).to.equal(userBefore.passwordHash);
     expect(hasher.verifyPassword(userAfter.passwordHash, "old-pw")).to.be.true;
   }
+
+  // Contract testing, testing both the fake and the real password hasers
+  function PasswordHasherContract(hasher) {
+    const hash = hasher.hashPassword("correct");
+
+    test("correct password"), () => {
+      expect(hasher.verifyPassword(hash, "correct")).to.be.true;
+    }
+    
+    test("wrong password"), () => {
+      expect(hasher.verifyPassword(hash, "wrong")).to.be.false;
+    }
+
+  }
+
+  describe("secure password hasher", () => {
+    const hasher = new SecurePasswordHasher();
+    PasswordHasherContract(hasher);
+  })
+
+  describe("fake password hasher", () => {
+    const hasher = new FakePasswordHasher();
+    PasswordHasherContract(hasher);
+
+    test("hash format", () => {
+
+    expect(hasher.hashPassword("abc")).to.equal("352441c2");
+    expect(hasher.intToHex(0)).to.equal("00000000");
+    expect(hasher.intToHex(1)).to.equal("00000001");
+    expect(hasher.intToHex(-1)).to.equal("ffffffff");
+  
+  });
+  })
 });

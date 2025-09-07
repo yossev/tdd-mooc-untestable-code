@@ -1,5 +1,6 @@
 import argon2, { hash } from "@node-rs/argon2";
 import pg from "pg";
+import { crc32 } from "@node-rs/crc32";
 
 // Singleton is an anti pattern
 // I Will be using fakes to test.
